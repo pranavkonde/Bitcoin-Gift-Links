@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 import { wagmiConfig } from './wagmi.ts'
+import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 
 const queryClient = new QueryClient()
 
@@ -14,7 +15,9 @@ createRoot(document.getElementById('root')!).render(
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <App />
+          <ErrorBoundary>
+            <App />
+          </ErrorBoundary>
         </BrowserRouter>
       </QueryClientProvider>
     </WagmiProvider>

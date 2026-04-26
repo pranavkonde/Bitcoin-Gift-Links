@@ -1,4 +1,5 @@
-import { Wallet, formatEther, getAddress } from 'ethers'
+import { formatEther, getAddress, isAddress } from 'viem'
+import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts'
 
 export type GiftPayload = {
   pk: string
@@ -8,26 +9,30 @@ export type GiftPayload = {
 }
 
 export function createGiftPayload(sender: string, amountWei: bigint | string): GiftPayload {
-  const wallet = Wallet.createRandom()
+  const pk = generatePrivateKey()
+  const account = privateKeyToAccount(pk)
   return {
-    pk: wallet.privateKey,
+    pk,
     sender: getAddress(sender),
     amountWei: amountWei.toString(),
-    giftWallet: wallet.address,
+    giftWallet: account.address,
   }
 }
 
 export function toClaimLink(payload: GiftPayload): string {
   const url = new URL(`${window.location.origin}/claim`)
-  url.searchParams.set('pk', payload.pk)
-  url.searchParams.set('sender', payload.sender)
-  url.searchParams.set('amountWei', payload.amountWei)
-  url.searchParams.set('giftWallet', payload.giftWallet)
+  const hashParams = new URLSearchParams()
+  hashParams.set('pk', payload.pk)
+  hashParams.set('sender', payload.sender)
+  hashParams.set('amountWei', payload.amountWei)
+  hashParams.set('giftWallet', payload.giftWallet)
+  url.hash = hashParams.toString()
   return url.toString()
 }
 
-export function parseClaimLink(search: string): GiftPayload | null {
-  const params = new URLSearchParams(search)
+export function parseClaimLink(hash: string): GiftPayload | null {
+  const cleanHash = hash.startsWith('#') ? hash.slice(1) : hash
+  const params = new URLSearchParams(cleanHash)
   const pk = params.get('pk')
   const sender = params.get('sender')
   const amountWei = params.get('amountWei')
@@ -38,15 +43,21 @@ export function parseClaimLink(search: string): GiftPayload | null {
   }
 
   try {
-    const wallet = new Wallet(pk)
-    if (wallet.address !== getAddress(giftWallet)) {
+    if (!/^\d+$/.test(amountWei)) {
+      return null
+    }
+    if (!isAddress(sender) || !isAddress(giftWallet)) {
+      return null
+    }
+    const account = privateKeyToAccount(pk as `0x${string}`)
+    if (account.address !== getAddress(giftWallet)) {
       return null
     }
     return {
-      pk: wallet.privateKey,
+      pk,
       sender: getAddress(sender),
       amountWei,
-      giftWallet: wallet.address,
+      giftWallet: account.address,
     }
   } catch {
     return null
@@ -54,5 +65,5 @@ export function parseClaimLink(search: string): GiftPayload | null {
 }
 
 export function formatRbtc(wei: bigint | string): string {
-  return `${formatEther(wei)} RBTC`
+  return `${formatEther(typeof wei === 'string' ? BigInt(wei) : wei)} RBTC`
 }

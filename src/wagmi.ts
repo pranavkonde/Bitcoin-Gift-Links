@@ -33,7 +33,7 @@ export const wagmiConfig = createConfig({
   chains: [rootstockTestnet],
   connectors,
   transports: {
-    [rootstockTestnet.id]: http(),
+    [rootstockTestnet.id]: http('https://public-node.testnet.rsk.co'),
   },
 })
 

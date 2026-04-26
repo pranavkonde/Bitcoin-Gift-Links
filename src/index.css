@@ -308,12 +308,14 @@ input {
   border-radius: 12px;
   padding: 0.72rem 0.85rem;
   font-size: 1rem;
-  transition: border-color 140ms ease;
+  transition: border-color 140ms ease, box-shadow 140ms ease;
 }
 
-input:focus {
-  outline: none;
+input:focus-visible {
+  outline: 2px solid rgba(124, 197, 255, 0.7);
+  outline-offset: 2px;
   border-color: rgba(124, 197, 255, 0.72);
+  box-shadow: 0 0 0 4px rgba(124, 197, 255, 0.16);
 }
 
 button {
@@ -331,6 +333,13 @@ button {
 button:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 10px 24px rgba(245, 158, 11, 0.44);
+}
+
+button:focus-visible,
+.nav-link:focus-visible,
+a:focus-visible {
+  outline: 2px solid rgba(124, 197, 255, 0.85);
+  outline-offset: 2px;
 }
 
 button.secondary {
@@ -370,6 +379,17 @@ code {
   color: #92d0ff;
   font-size: 0.95rem;
   line-height: 1.5;
+}
+
+.form-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.inline-link {
+  color: #93d4ff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .warning {
